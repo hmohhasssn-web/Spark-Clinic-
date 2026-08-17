@@ -1,0 +1,62 @@
+import { supabase } from './supabaseClient';
+
+export async function getAvailableSlots(date, ageCategory) {
+  const duration = ageCategory === 'adults' ? 60 : 45;
+
+  const { data: settings } = await supabase.from('clinic_settings').select('*').single();
+  const startTime = settings?.work_start_time || '09:00:00';
+  const endTime = settings?.work_end_time || '21:00:00';
+
+  const { data: bookings } = await supabase
+    .from('bookings')
+    .select('start_time, end_time')
+    .eq('booking_date', date)
+    .in('status', ['pending', 'confirmed']);
+
+  const { data: blocked } = await supabase
+    .from('blocked_slots')
+    .select('start_time, end_time')
+    .eq('block_date', date);
+
+  const busySlots = [...(bookings || []), ...(blocked || [])];
+
+  const availableSlots = [];
+  let current = parseTime(startTime);
+  const end = parseTime(endTime);
+
+  while (current + duration <= end) {
+    const slotStart = current;
+    const slotEnd = current + duration;
+
+    const isOverlapping = busySlots.some((b) => {
+      const bStart = parseTime(b.start_time);
+      const bEnd = parseTime(b.end_time);
+      return slotStart < bEnd && slotEnd > bStart;
+    });
+
+    if (!isOverlapping) {
+      availableSlots.push({
+        start: formatTime(slotStart),
+        end: formatTime(slotEnd),
+      });
+    }
+
+    current += duration;
+  }
+
+  return availableSlots;
+}
+
+function parseTime(timeStr) {
+  const [h, m] = timeStr.split(':').map(Number);
+  return h * 60 + m;
+}
+
+function formatTime(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const period = h >= 12 ? 'م' : 'ص';
+  const formattedH = h % 12 === 0 ? 12 : h % 12;
+  const formattedM = m < 10 ? `0${m}` : m;
+  return `${formattedH}:${formattedM} ${period}`;
+}
