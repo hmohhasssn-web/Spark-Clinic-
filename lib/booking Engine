@@ -2,25 +2,24 @@ import { supabase } from './supabaseClient';
 
 export async function getAvailableSlots(date) {
   try {
-    // 1. محاولة جلب المواعيد من Supabase
     if (supabase) {
       const { data, error } = await supabase
         .from('appointments')
         .select('*')
         .eq('appointment_date', date);
 
-      if (!error && data && data.length > 0) {
+      if (!error && Array.isArray(data) && data.length > 0) {
         return data;
       }
     }
-  } catch (err) {
-    console.error('Error fetching slots:', err);
+  } catch (e) {
+    console.error('Supabase fetch error:', e);
   }
 
-  // 2. أوقات احتياطية تجريبية تمنع انهيار الشاشة إذا فشل الاستعلام أو كانت القاعدة فارغة
+  // أوقات افتراضية تمنع الانهيار تماماً حتى لو لم تكتمل الإعدادات
   return [
-    { time_slot: '10:00 AM', available: true },
-    { time_slot: '02:00 PM', available: true },
-    { time_slot: '06:00 PM', available: true }
+    { time_slot: '10:00 AM' },
+    { time_slot: '02:00 PM' },
+    { time_slot: '06:00 PM' }
   ];
 }
