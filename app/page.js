@@ -2,7 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabaseClient';
-//import { getAvailableSlots } from '../lib/bookingEngine';
+// استبدل الجزء الخاص بعرض المواعيد بهذا الكود:
+{availableSlots && Array.isArray(availableSlots) ? (
+  availableSlots.map((slot, index) => (
+    <div key={index}>{slot.time_slot || 'متاح'}</div>
+  ))
+) : (
+  <p>لا توجد مواعيد متاحة حالياً</p>
+)}
+
 export default function BookingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
