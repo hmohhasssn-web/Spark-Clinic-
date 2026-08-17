@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { getAvailableSlots } from '@/lib/bookingEngine';
-
+import { supabase } from '../lib/supabaseClient';
+import { getAvailableSlots } from '../lib/bookingEngine';
 export default function BookingPage() {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
