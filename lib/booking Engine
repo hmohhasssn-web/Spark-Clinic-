@@ -1,21 +1,9 @@
 import { supabase } from './supabaseClient';
 
 export async function getAvailableSlots(date) {
-  try {
-    if (!supabase) return [];
-    
-    const { data, error } = await supabase
-      .from('appointments')
-      .select('*');
+  return [];
+}
 
-    if (error) {
-      console.log('Supabase error:', error);
-      return [];
-    }
-
-    return data || [];
-  } catch (err) {
-    console.log('Execution error:', err);
-    return [];
-  }
+export default async function bookingEngine(date) {
+  return [];
 }
